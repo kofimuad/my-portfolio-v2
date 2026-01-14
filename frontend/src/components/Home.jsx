@@ -1,3 +1,4 @@
+// src/components/Home.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/home.css';
@@ -50,7 +51,7 @@ export default function Home() {
             <a href="/assets/resume.pdf" target="_blank" className="btn btn-primary">
               Resume
             </a>
-            <a href="/about#contact" className="btn btn-secondary">
+            <a href="/about?scroll=contact-form-container" className="btn btn-secondary">
               Contact
             </a>
           </div>

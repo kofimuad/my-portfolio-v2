@@ -191,7 +191,7 @@
   background: #3d8b3d;
 }
 
-.btn-secondary {
+.btn-secondary1 {
   background: #555;
   color: #e0e0e0;
   border: none;
@@ -204,7 +204,7 @@
   font-family: 'Trebuchet MS', 'Lucida Sans', sans-serif;
 }
 
-.btn-secondary:hover {
+.btn-secondary1:hover {
   background: #666;
 }
 
@@ -755,7 +755,7 @@
   transform: translateY(-2px);
 }
 
-.btn-secondary {
+.btn-secondary1 {
   background: #e9ecef;
   color: #333;
   border: none;
@@ -767,7 +767,7 @@
   transition: all 0.3s;
 }
 
-.btn-secondary:hover {
+.btn-secondary1:hover {
   background: #dee2e6;
 }
 

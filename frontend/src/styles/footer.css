@@ -1,0 +1,15 @@
+/* src/styles/footer.css */
+
+.footer {
+  background: #2a2a2a;
+  padding: 20px;
+  text-align: center;
+  margin-top: auto;
+}
+
+.footer p {
+  color: #e1dbdb;
+  font-size: 13px;
+  margin: 0;
+  font-family: 'Trebuchet MS', 'Lucida Sans', sans-serif;
+}
