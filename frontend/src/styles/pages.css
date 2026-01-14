@@ -37,9 +37,9 @@
 .bio-section,
 .skills-section,
 .hobbies-section {
-  background: #2a2a2a;
+  background: var(--bg-secondary);
   padding: 35px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   border-radius: 0;
   transition: all 0.3s ease;
 }
@@ -127,9 +127,9 @@
 }
 
 .blog-card {
-  background: #2a2a2a;
+  background: var(--bg-secondary);
   padding: 30px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   border-left: 3px solid #4da84d;
   border-radius: 0;
   transition: all 0.3s ease;
@@ -143,19 +143,19 @@
 
 .blog-card h3 {
   font-size: 20px;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin: 0 0 10px 0;
   font-weight: 400;
 }
 
 .blog-meta {
-  color: #666;
+  color: var(--text-tertiary);
   font-size: 12px;
   margin: 0 0 15px 0;
 }
 
 .blog-excerpt {
-  color: #aaa;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.6;
   margin: 0 0 20px 0;

@@ -2,6 +2,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import Navigation from './components/Navigation';
+import ThemeToggle from './components/ThemeToggle';
 import Footer from './components/Footer';
 import Home from './components/Home';
 import About from './components/About';
@@ -14,6 +15,7 @@ import './styles/navigation.css';
 import './styles/pages.css';
 import './styles/home.css';
 import './styles/footer.css';
+import './styles/theme-toggle.css';
 import './styles/admin.css';
 
 function App() {
@@ -52,6 +54,7 @@ function App() {
   return (
     <div className="app-container">
       <Navigation />
+      {/* <ThemeToggle /> */}
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
