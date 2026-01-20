@@ -48,7 +48,7 @@ export default function Home() {
           <p className="title">Full Stack Web Developer</p>
           
           <div className="btn-container">
-            <a href="/assets/resume.pdf" target="_blank" className="btn btn-primary">
+            <a href="/resume.pdf" target="_blank" className="btn btn-primary">
               Resume
             </a>
             <a href="/about?scroll=contact-form-container" className="btn btn-secondary">
