@@ -22,6 +22,7 @@ class ProjectBase(BaseModel):
     description: str
     image_url: str
     github_link: str
+    demo_link: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
     pass

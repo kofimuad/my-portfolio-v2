@@ -12,7 +12,11 @@ export default function ProjectManager() {
     description: '',
     image_url: '',
     github_link: '',
+    demo_link: '',
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -40,22 +44,112 @@ export default function ProjectManager() {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      // Validate file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      setError('');
+      
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!imageFile) return null;
+
+    setUploadingImage(true);
+    try {
+      const formDataWithImage = new FormData();
+      formDataWithImage.append('file', imageFile);
+      
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Upload to backend API
+      const response = await fetch('http://localhost:8000/api/projects/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formDataWithImage,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+          // Response wasn't JSON
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('Upload response:', data);
+      if (!data.image_url && !data.url) {
+        throw new Error('No image URL in response');
+      }
+      const imageUrl = data.image_url || data.url;
+      // Convert relative path to full backend URL
+      const fullUrl = imageUrl.startsWith('http') ? imageUrl : `http://localhost:8000${imageUrl}`;
+      return fullUrl;
+    } catch (err) {
+      setError(`Image upload error: ${err.message}`);
+      console.error('Upload error:', err);
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingId) {
-        await projectsAPI.update(editingId, formData);
-      } else {
-        await projectsAPI.create(formData);
+      let imageUrl = formData.image_url;
+
+      // Upload image if a new file was selected
+      if (imageFile) {
+        imageUrl = await uploadImage();
+        if (!imageUrl) {
+          return; // Error already set in uploadImage
+        }
       }
-      setFormData({
-        title: '',
-        description: '',
-        image_url: '',
-        github_link: '',
-      });
-      setEditingId(null);
-      setShowForm(false);
+
+      const projectData = {
+        title: formData.title,
+        description: formData.description,
+        image_url: imageUrl,
+        github_link: formData.github_link,
+        demo_link: formData.demo_link,
+      };
+
+      console.log('Sending project data:', projectData);
+
+      if (editingId) {
+        console.log('Updating project:', editingId);
+        await projectsAPI.update(editingId, projectData);
+      } else {
+        console.log('Creating new project');
+        await projectsAPI.create(projectData);
+      }
+
+      resetForm();
       fetchProjects();
     } catch (err) {
       setError('Failed to save project');
@@ -63,13 +157,31 @@ export default function ProjectManager() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      image_url: '',
+      github_link: '',
+      demo_link: '',
+    });
+    setImageFile(null);
+    setImagePreview('');
+    setEditingId(null);
+    setShowForm(false);
+  };
+
   const handleEdit = (project) => {
+    console.log('Editing project:', project);
     setFormData({
       title: project.title,
       description: project.description,
       image_url: project.image_url,
       github_link: project.github_link,
+      demo_link: project.demo_link || '',
     });
+    setImagePreview(project.image_url);
+    setImageFile(null);
     setEditingId(project.id);
     setShowForm(true);
   };
@@ -87,14 +199,7 @@ export default function ProjectManager() {
   };
 
   const handleCancel = () => {
-    setFormData({
-      title: '',
-      description: '',
-      image_url: '',
-      github_link: '',
-    });
-    setEditingId(null);
-    setShowForm(false);
+    resetForm();
   };
 
   if (loading) return <div className="loading">Loading projects...</div>;
@@ -137,16 +242,26 @@ export default function ProjectManager() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="image_url">Image URL</label>
-            <input
-              id="image_url"
-              type="url"
-              name="image_url"
-              value={formData.image_url}
-              onChange={handleInputChange}
-              placeholder="https://example.com/image.jpg"
-              required
-            />
+            <label htmlFor="image">Project Image</label>
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+              </div>
+            )}
+            <label htmlFor="image" className="file-input-label">
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={uploadingImage}
+                style={{ display: 'none' }}
+              />
+              <span className="file-input-button">
+                {imageFile ? `${imageFile.name} selected` : 'Choose Image File'}
+              </span>
+            </label>
+            <small>Supported formats: JPG, PNG, GIF. Max size: 5MB</small>
           </div>
 
           <div className="form-group">
@@ -162,9 +277,21 @@ export default function ProjectManager() {
             />
           </div>
 
+          <div className="form-group">
+            <label htmlFor="demo_link">Demo Link (Optional)</label>
+            <input
+              id="demo_link"
+              type="url"
+              name="demo_link"
+              value={formData.demo_link}
+              onChange={handleInputChange}
+              placeholder="https://example.com/demo"
+            />
+          </div>
+
           <div className="form-actions">
-            <button type="submit" className="btn-primary">
-              {editingId ? 'Update' : 'Create'}
+            <button type="submit" className="btn-primary" disabled={uploadingImage}>
+              {uploadingImage ? 'Uploading...' : editingId ? 'Update' : 'Create'}
             </button>
             <button type="button" className="btn-secondary1" onClick={handleCancel}>
               Cancel
@@ -184,9 +311,16 @@ export default function ProjectManager() {
               )}
               <h3>{project.title}</h3>
               <p>{project.description}</p>
-              <a href={project.github_link} target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
+              <div className="project-links">
+                {project.demo_link && (
+                  <a href={project.demo_link} target="_blank" rel="noopener noreferrer">
+                    Live Project
+                  </a>
+                )}
+                <a href={project.github_link} target="_blank" rel="noopener noreferrer">
+                  GitHub
+                </a>
+              </div>
               <div className="item-actions">
                 <button
                   className="btn-edit"

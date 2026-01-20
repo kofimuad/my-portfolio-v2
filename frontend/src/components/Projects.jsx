@@ -41,14 +41,26 @@ export default function Projects() {
               <div className="project-info">
                 <h3>{project.title}</h3>
                 <p>{project.description}</p>
-                <a
-                  href={project.github_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="project-link"
-                >
-                  View on GitHub →
-                </a>
+                <div className="project-links">
+                  {project.demo_link && project.demo_link.trim() ? (
+                    <a
+                      href={project.demo_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-link"
+                    >
+                      View Project →
+                    </a>
+                  ) : null}
+                  <a
+                    href={project.github_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-link"
+                  >
+                    View on GitHub →
+                  </a>
+                </div>
               </div>
             </div>
           ))

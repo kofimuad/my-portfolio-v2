@@ -1,12 +1,25 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile, File
+from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.database import projects_collection
 from app.models import Project, ProjectCreate
 from app.auth import verify_token
 from typing import Optional
+import os
+import shutil
+from pathlib import Path
+import uuid
 
 router = APIRouter()
+
+# Configure upload directory
+UPLOAD_DIR = "uploads/projects"
+Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+
+# Allowed file extensions
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 def get_token(authorization: Optional[str] = Header(None)) -> str:
     """Extract and validate token from Authorization header"""
@@ -20,6 +33,53 @@ def get_token(authorization: Optional[str] = Header(None)) -> str:
         return token
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header")
+
+# UPLOAD image (requires auth)
+@router.post("/upload")
+async def upload_image(file: UploadFile = File(...), token: str = Depends(get_token)):
+    """
+    Upload an image file for a project.
+    Returns the image URL path.
+    """
+    try:
+        print(f"✓ Uploading image with token: {token[:20]}...")
+        verify_token(token)
+        
+        # Validate file extension
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        if file_ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+            )
+        
+        # Validate file size
+        contents = await file.read()
+        if len(contents) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail="File size exceeds 5MB limit"
+            )
+        
+        # Generate unique filename
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        
+        # Save file
+        with open(file_path, "wb") as f:
+            f.write(contents)
+        
+        # Return the image URL path
+        image_url = f"/uploads/projects/{unique_filename}"
+        print(f"✓ Image uploaded successfully: {image_url}")
+        
+        return {"image_url": image_url, "url": image_url}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error uploading image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # GET all projects (public)
 @router.get("/")
@@ -54,7 +114,8 @@ def create_project(project: ProjectCreate, token: str = Depends(get_token)):
     try:
         print(f"✓ Creating project with token: {token[:20]}...")
         verify_token(token)
-        project_data = project.dict()
+        project_data = project.dict(exclude_none=False)
+        print(f"✓ Project data to create: {project_data}")
         project_data["created_at"] = datetime.utcnow()
         project_data["updated_at"] = datetime.utcnow()
         result = projects_collection.insert_one(project_data)
@@ -74,16 +135,36 @@ def update_project(project_id: str, project: ProjectCreate, token: str = Depends
     try:
         print(f"✓ Updating project {project_id} with token: {token[:20]}...")
         verify_token(token)
-        project_data = project.dict()
+        project_data = project.dict(exclude_unset=False)
+        print(f"✓ Project data received: {project_data}")
+        print(f"✓ Demo link value: '{project_data.get('demo_link')}'")
         project_data["updated_at"] = datetime.utcnow()
+        
+        # Make sure demo_link is included
+        if "demo_link" not in project_data:
+            project_data["demo_link"] = project.demo_link or ""
+        
+        print(f"✓ Final data to save: {project_data}")
+        
         result = projects_collection.update_one(
             {"_id": ObjectId(project_id)},
             {"$set": project_data}
         )
+        
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Project not found")
-        print(f"✓ Project updated successfully")
-        return {"message": "Project updated successfully"}
+        
+        # Fetch and return the updated project
+        updated_project = projects_collection.find_one({"_id": ObjectId(project_id)})
+        if updated_project:
+            updated_project["id"] = str(updated_project["_id"])
+            del updated_project["_id"]
+            print(f"✓ Project updated successfully: {updated_project}")
+            return updated_project
+        else:
+            print(f"✓ Project updated successfully")
+            return {"message": "Project updated successfully"}
+            
     except HTTPException:
         raise
     except Exception as e:

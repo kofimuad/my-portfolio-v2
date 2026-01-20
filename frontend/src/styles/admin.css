@@ -567,3 +567,40 @@
     width: 100%;
   }
 }
+
+/* File Input Styling */
+.file-input-label {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-input-button {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.file-input-button:hover {
+  background-color: #444;
+  border-color: #888;
+}
+
+.image-preview {
+  margin: 12px 0;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 300px;
+  border: 2px solid #555;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
