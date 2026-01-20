@@ -33,15 +33,15 @@ export default function About() {
 
   // Scroll to contact form if query param is set
   useEffect(() => {
-    if (searchParams.get('scroll') === 'contact-form-container') {
+    if (searchParams.get('scroll') === 'contact-form-container' && !loading) {
       setTimeout(() => {
         const contactElement = document.querySelector('.contact-form-container');
         if (contactElement) {
           contactElement.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100);
+      }, 300);
     }
-  }, [searchParams]);
+  }, [searchParams, loading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
