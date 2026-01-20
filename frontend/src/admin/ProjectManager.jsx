@@ -19,6 +19,8 @@ export default function ProjectManager() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
 
+  const BACKEND_URL = 'https://my-portfolio-v2-r6ow.onrender.com';
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -81,7 +83,7 @@ export default function ProjectManager() {
       }
 
       // Upload to backend API
-      const response = await fetch('http://localhost:8000/api/projects/upload', {
+      const response = await fetch(`${BACKEND_URL}/api/projects/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +109,7 @@ export default function ProjectManager() {
       }
       const imageUrl = data.image_url || data.url;
       // Convert relative path to full backend URL
-      const fullUrl = imageUrl.startsWith('http') ? imageUrl : `http://localhost:8000${imageUrl}`;
+      const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${BACKEND_URL}${imageUrl}`;
       return fullUrl;
     } catch (err) {
       setError(`Image upload error: ${err.message}`);
