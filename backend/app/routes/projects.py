@@ -34,7 +34,7 @@ def get_token(authorization: Optional[str] = Header(None)) -> str:
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 
-# UPLOAD image (requires auth)
+# UPLOAD image (requires auth) - MUST BE BEFORE /{project_id}
 @router.post("/upload")
 async def upload_image(file: UploadFile = File(...), token: str = Depends(get_token)):
     """
@@ -114,7 +114,7 @@ def create_project(project: ProjectCreate, token: str = Depends(get_token)):
     try:
         print(f"✓ Creating project with token: {token[:20]}...")
         verify_token(token)
-        project_data = project.dict(exclude_none=False)
+        project_data = project.dict(exclude_unset=False)
         print(f"✓ Project data to create: {project_data}")
         project_data["created_at"] = datetime.utcnow()
         project_data["updated_at"] = datetime.utcnow()
