@@ -39,7 +39,7 @@ def get_token(authorization: Optional[str] = Header(None)) -> str:
 async def upload_image(file: UploadFile = File(...), token: str = Depends(get_token)):
     """
     Upload an image file for a project.
-    Returns the image URL path.
+    Returns the full image URL path.
     """
     try:
         print(f"✓ Uploading image with token: {token[:20]}...")
@@ -69,11 +69,21 @@ async def upload_image(file: UploadFile = File(...), token: str = Depends(get_to
         with open(file_path, "wb") as f:
             f.write(contents)
         
-        # Return the image URL path
-        image_url = f"/uploads/projects/{unique_filename}"
-        print(f"✓ Image uploaded successfully: {image_url}")
+        # DEBUG: Check environment variable
+        backend_url = os.getenv('BACKEND_URL')
+        print(f"🔍 DEBUG: BACKEND_URL env var = {backend_url}")
         
-        return {"image_url": image_url, "url": image_url}
+        # Return FULL URL - hardcode it for now to test
+        # We'll use the hardcoded URL until we confirm env vars work
+        base_url = "https://my-portfolio-v2-r6ow.onrender.com"
+        full_image_url = f"{base_url}/uploads/projects/{unique_filename}"
+        
+        print(f"✓ Image uploaded successfully: {full_image_url}")
+        
+        return {
+            "image_url": full_image_url,
+            "url": full_image_url
+        }
         
     except HTTPException:
         raise
