@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile, File
-from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.database import projects_collection
@@ -7,15 +6,18 @@ from app.models import Project, ProjectCreate
 from app.auth import verify_token
 from typing import Optional
 import os
-import shutil
-from pathlib import Path
-import uuid
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 router = APIRouter()
 
-# Configure upload directory
-UPLOAD_DIR = "uploads/projects"
-Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
@@ -34,12 +36,12 @@ def get_token(authorization: Optional[str] = Header(None)) -> str:
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 
-# UPLOAD image (requires auth) - MUST BE BEFORE /{project_id}
+# UPLOAD image (requires auth)
 @router.post("/upload")
 async def upload_image(file: UploadFile = File(...), token: str = Depends(get_token)):
     """
-    Upload an image file for a project.
-    Returns the full image URL path.
+    Upload an image file for a project to Cloudinary.
+    Returns the image URL.
     """
     try:
         print(f"✓ Uploading image with token: {token[:20]}...")
@@ -53,37 +55,40 @@ async def upload_image(file: UploadFile = File(...), token: str = Depends(get_to
                 detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
             )
         
-        # Validate file size
+        # Read file contents
         contents = await file.read()
+        
+        # Validate file size
         if len(contents) > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=400, 
                 detail="File size exceeds 5MB limit"
             )
         
-        # Generate unique filename
-        unique_filename = f"{uuid.uuid4()}{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        
-        # Save file
-        with open(file_path, "wb") as f:
-            f.write(contents)
-        
-        # DEBUG: Check environment variable
-        backend_url = os.getenv('BACKEND_URL')
-        print(f"🔍 DEBUG: BACKEND_URL env var = {backend_url}")
-        
-        # Return FULL URL - hardcode it for now to test
-        # We'll use the hardcoded URL until we confirm env vars work
-        base_url = "https://my-portfolio-v2-r6ow.onrender.com"
-        full_image_url = f"{base_url}/uploads/projects/{unique_filename}"
-        
-        print(f"✓ Image uploaded successfully: {full_image_url}")
-        
-        return {
-            "image_url": full_image_url,
-            "url": full_image_url
-        }
+        # Upload to Cloudinary
+        try:
+            result = cloudinary.uploader.upload(
+                contents,
+                folder="portfolio/projects",
+                resource_type="auto"
+            )
+            image_url = result.get('secure_url')
+            
+            if not image_url:
+                raise Exception("No URL returned from Cloudinary")
+            
+            print(f"✓ Image uploaded successfully to Cloudinary: {image_url}")
+            
+            return {
+                "image_url": image_url,
+                "url": image_url
+            }
+        except Exception as e:
+            print(f"❌ Cloudinary upload error: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to upload image to cloud: {str(e)}"
+            )
         
     except HTTPException:
         raise
