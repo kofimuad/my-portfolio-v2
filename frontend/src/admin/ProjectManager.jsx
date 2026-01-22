@@ -19,8 +19,6 @@ export default function ProjectManager() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
 
-  const BACKEND_URL = 'https://my-portfolio-v2-r6ow.onrender.com';
-
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -82,8 +80,8 @@ export default function ProjectManager() {
         throw new Error('No authentication token found');
       }
 
-      // Upload to backend API
-      const response = await fetch(`${BACKEND_URL}/api/projects/upload`, {
+      // Upload to backend API using relative path
+      const response = await fetch('/api/projects/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,13 +102,16 @@ export default function ProjectManager() {
 
       const data = await response.json();
       console.log('Upload response:', data);
+      
       if (!data.image_url && !data.url) {
         throw new Error('No image URL in response');
       }
+      
+      // Use the URL returned from backend (Cloudinary URL)
       const imageUrl = data.image_url || data.url;
-      // Convert relative path to full backend URL
-      const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${BACKEND_URL}${imageUrl}`;
-      return fullUrl;
+      console.log('Image URL from backend:', imageUrl);
+      
+      return imageUrl;
     } catch (err) {
       setError(`Image upload error: ${err.message}`);
       console.error('Upload error:', err);
