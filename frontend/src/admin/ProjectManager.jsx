@@ -80,8 +80,14 @@ export default function ProjectManager() {
         throw new Error('No authentication token found');
       }
 
-      // Upload to backend API using relative path
-      const response = await fetch('/api/projects/upload', {
+      // Get the API URL - use VITE_API_URL from .env or construct from window location
+      const apiUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.host}`;
+      const uploadUrl = `${apiUrl}/api/projects/upload`;
+      
+      console.log('Uploading to:', uploadUrl);
+
+      // Upload to backend API
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
