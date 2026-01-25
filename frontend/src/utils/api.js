@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = 'https://my-portfolio-v2-production-5027.up.railway.app';
+
+// let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Force HTTPS in production (non-localhost environments)
 if (!API_URL.startsWith('http://localhost')) {
