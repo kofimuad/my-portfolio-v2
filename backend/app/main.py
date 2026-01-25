@@ -1,4 +1,3 @@
-# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +8,9 @@ from pathlib import Path
 from app.routes import blogs, projects, about, contact, auth
 
 app = FastAPI(title="Portfolio API", version="1.0.0")
+
+# Disable automatic trailing slash redirect
+app.router.redirect_slashes = False
 
 # CORS Configuration
 app.add_middleware(
