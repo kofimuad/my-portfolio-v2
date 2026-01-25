@@ -12,7 +12,7 @@ const getFullImageUrl = (imageUrl) => {
   }
   
   // If it's a relative path, prepend the backend URL
-  const backendUrl = 'https://my-portfolio-v2-r6ow.onrender.com';
+  const backendUrl = 'https://my-portfolio-v2-production-5027.up.railway.app';
   return `${backendUrl}${imageUrl}`;
 };
 

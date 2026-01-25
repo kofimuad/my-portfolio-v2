@@ -13,7 +13,7 @@ app = FastAPI(title="Portfolio API", version="1.0.0")
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, "http://localhost:5173", "http://localhost:3000", "https://mark-agyei.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
