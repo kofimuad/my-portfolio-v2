@@ -36,6 +36,14 @@ def get_token(authorization: Optional[str] = Header(None)) -> str:
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 
+def convert_to_object_id(id_str: str) -> ObjectId:
+    """Convert string to ObjectId with proper error handling"""
+    try:
+        return ObjectId(id_str)
+    except Exception as e:
+        print(f"❌ Invalid ID format: {id_str}")
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+
 # UPLOAD image (requires auth)
 @router.post("/upload")
 async def upload_image(file: UploadFile = File(...), token: str = Depends(get_token)):
@@ -113,12 +121,15 @@ def get_projects():
 @router.get("/{project_id}")
 def get_project(project_id: str):
     try:
-        project = projects_collection.find_one({"_id": ObjectId(project_id)})
+        object_id = convert_to_object_id(project_id)
+        project = projects_collection.find_one({"_id": object_id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         project["id"] = str(project["_id"])
         del project["_id"]
         return project
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error fetching project: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -150,6 +161,9 @@ def update_project(project_id: str, project: ProjectCreate, token: str = Depends
     try:
         print(f"✓ Updating project {project_id} with token: {token[:20]}...")
         verify_token(token)
+        
+        object_id = convert_to_object_id(project_id)
+        
         project_data = project.dict(exclude_unset=False)
         print(f"✓ Project data received: {project_data}")
         print(f"✓ Demo link value: '{project_data.get('demo_link')}'")
@@ -162,15 +176,16 @@ def update_project(project_id: str, project: ProjectCreate, token: str = Depends
         print(f"✓ Final data to save: {project_data}")
         
         result = projects_collection.update_one(
-            {"_id": ObjectId(project_id)},
+            {"_id": object_id},
             {"$set": project_data}
         )
         
         if result.matched_count == 0:
+            print(f"❌ Project not found with ID: {project_id}")
             raise HTTPException(status_code=404, detail="Project not found")
         
         # Fetch and return the updated project
-        updated_project = projects_collection.find_one({"_id": ObjectId(project_id)})
+        updated_project = projects_collection.find_one({"_id": object_id})
         if updated_project:
             updated_project["id"] = str(updated_project["_id"])
             del updated_project["_id"]
@@ -192,8 +207,12 @@ def delete_project(project_id: str, token: str = Depends(get_token)):
     try:
         print(f"✓ Deleting project {project_id} with token: {token[:20]}...")
         verify_token(token)
-        result = projects_collection.delete_one({"_id": ObjectId(project_id)})
+        
+        object_id = convert_to_object_id(project_id)
+        
+        result = projects_collection.delete_one({"_id": object_id})
         if result.deleted_count == 0:
+            print(f"❌ Project not found with ID: {project_id}")
             raise HTTPException(status_code=404, detail="Project not found")
         print(f"✓ Project deleted successfully")
         return {"message": "Project deleted successfully"}
