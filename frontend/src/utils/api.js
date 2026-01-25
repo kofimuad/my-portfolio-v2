@@ -8,7 +8,7 @@ console.log('🚀 API_URL:', API_URL);
 // Create axios instance with explicit HTTPS
 const apiConfig = {
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000,  // Increased from 10s to 30s for slower connections
   headers: {
     'Content-Type': 'application/json',
   },
@@ -50,70 +50,70 @@ api.interceptors.response.use(
 // ============== Authentication API ==============
 export const authAPI = {
   login: (password) => 
-    api.post('/api/auth/login', { password }),
+    api.post('/api/auth/login/', { password }),
 };
 
 // ============== Blogs API ==============
 export const blogsAPI = {
   getAll: () => 
-    api.get('/api/blogs'),
+    api.get('/api/blogs/'),
 
   getOne: (id) => 
-    api.get(`/api/blogs/${id}`),
+    api.get(`/api/blogs/${id}/`),
 
   create: (data) => 
-    api.post('/api/blogs', data),
+    api.post('/api/blogs/', data),
 
   update: (id, data) => 
-    api.put(`/api/blogs/${id}`, data),
+    api.put(`/api/blogs/${id}/`, data),
 
   delete: (id) => 
-    api.delete(`/api/blogs/${id}`),
+    api.delete(`/api/blogs/${id}/`),
 };
 
 // ============== Projects API ==============
 export const projectsAPI = {
   getAll: () => 
-    api.get('/api/projects'),
+    api.get('/api/projects/'),
 
   getOne: (id) => 
-    api.get(`/api/projects/${id}`),
+    api.get(`/api/projects/${id}/`),
 
   create: (data) => 
-    api.post('/api/projects', data),
+    api.post('/api/projects/', data),
 
   update: (id, data) => 
-    api.put(`/api/projects/${id}`, data),
+    api.put(`/api/projects/${id}/`, data),
 
   delete: (id) => 
-    api.delete(`/api/projects/${id}`),
+    api.delete(`/api/projects/${id}/`),
 };
 
 // ============== About API ==============
 export const aboutAPI = {
   getAll: () => 
-    api.get('/api/about'),
+    api.get('/api/about/'),
 
   getOne: (id) => 
-    api.get(`/api/about/${id}`),
+    api.get(`/api/about/${id}/`),
 
   create: (data) => 
-    api.post('/api/about', data),
+    api.post('/api/about/', data),
 
   update: (id, data) => 
-    api.put(`/api/about/${id}`, data),
+    api.put(`/api/about/${id}/`, data),
 };
 
 // ============== Contact API ==============
 export const contactAPI = {
   getAll: () => 
-    api.get('/api/contact'),
+    api.get('/api/contact/'),
 
   submit: (data) => 
-    api.post('/api/contact', data),
+    api.post('/api/contact/', data),
 
   delete: (id) => 
-    api.delete(`/api/contact/${id}`),
+    api.delete(`/api/contact/${id}/`),
 };
 
 // ============== Error Handling Utility ==============
