@@ -1,13 +1,7 @@
 import axios from 'axios';
 
+// Hardcode HTTPS for production
 const API_URL = 'https://my-portfolio-v2-production-5027.up.railway.app';
-
-// let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-// Force HTTPS in production (non-localhost environments)
-if (!API_URL.startsWith('http://localhost')) {
-  API_URL = API_URL.replace('http://', 'https://');
-}
 
 console.log('API_URL being used:', API_URL);
 
