@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// Force HTTPS in production (non-localhost environments)
+if (!API_URL.startsWith('http://localhost')) {
+  API_URL = API_URL.replace('http://', 'https://');
+}
+
+console.log('API_URL being used:', API_URL);
 
 // Create axios instance
 export const api = axios.create({
