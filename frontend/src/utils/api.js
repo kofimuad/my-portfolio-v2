@@ -50,7 +50,7 @@ api.interceptors.response.use(
 // ============== Authentication API ==============
 export const authAPI = {
   login: (password) => 
-    api.post('/api/auth/login/', { password }),
+    api.post('/api/auth/login', { password }),
 };
 
 // ============== Blogs API ==============
