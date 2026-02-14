@@ -68,7 +68,7 @@ export const blogsAPI = {
     api.put(`/api/blogs/${id}/`, data),
 
   delete: (id) => 
-    api.delete(`/api/blogs/${id}/`),
+    api.delete(`/api/blogs/${id}`),
 };
 
 // ============== Projects API ==============
@@ -86,7 +86,7 @@ export const projectsAPI = {
     api.put(`/api/projects/${id}/`, data),
 
   delete: (id) => 
-    api.delete(`/api/projects/${id}/`),
+    api.delete(`/api/projects/${id}`),
 };
 
 // ============== About API ==============
@@ -113,7 +113,7 @@ export const contactAPI = {
     api.post('/api/contact/', data),
 
   delete: (id) => 
-    api.delete(`/api/contact/${id}/`),
+    api.delete(`/api/contact/${id}`),
 };
 
 // ============== Error Handling Utility ==============
