@@ -80,9 +80,9 @@ export default function ProjectManager() {
         throw new Error('No authentication token found');
       }
 
-      // Get the API URL - use VITE_API_URL from .env or construct from window location
-      const apiUrl = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.host}`;
-      const uploadUrl = `${apiUrl}/api/projects/upload`;
+      // Get the API URL and remove trailing slash to avoid double slashes
+      const baseUrl = (import.meta.env.VITE_BACKEND_URL || 'https://my-portfolio-v2-production-5027.up.railway.app').replace(/\/$/, '');
+      const uploadUrl = `${baseUrl}/api/projects/upload`;
       
       console.log('Uploading to:', uploadUrl);
 
