@@ -85,7 +85,7 @@ export default function About() {
         </div>
 
         <div className="skills-section">
-          <h2># Skills</h2>
+          <h2># Skills and Tools</h2>
           <div className="skills-list">
             {about && about.skills && about.skills.map((skill, index) => (
               <span key={index} className="skill-tag">
