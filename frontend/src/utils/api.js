@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Force HTTPS - Railway requires it
-const API_URL = 'https://my-portfolio-v2-r6ow.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL;
 
 console.log('🚀 API_URL:', API_URL);
 
